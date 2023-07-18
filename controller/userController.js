@@ -2,7 +2,7 @@ const userSchema = require("../models/userSchema");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { transporter, mailOption } = require("../services/emailService");
-//const { unlink } = require('../routes/companyRoute');
+//const { unlink } = require('../routes/companyRoute'); 
 const { unlinkSync } = require("fs");
 
 let createUser = async (req, res) => {
@@ -31,7 +31,7 @@ let createUser = async (req, res) => {
       userData.profilePic = filePath;
 
       let user = await userData.save();
-      res.status(201).json({
+        res.status(201).json({
         success: true,
         message: "User added Successfully",
         user: user,
@@ -132,7 +132,7 @@ const resetUserPassword = async (req, res) => {
 //Reset Password from url API
 let resetPassword = async (req, res) => {
   const { id, token } = req.params;
-  console.log("id", id);
+//console.log("id", id);
   let { newPassword, confirmPassword } = req.body;
   try {
     const checkUser = await userSchema.findById(id);
@@ -159,7 +159,7 @@ let resetPassword = async (req, res) => {
     } else {
       res.status(403).json({
         success: false,
-        message: "User email is not found",
+        message: "User id is not found",
       });
     }
   } catch (error) {
