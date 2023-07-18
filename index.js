@@ -38,5 +38,5 @@ app.get("/send", async (req, res) => {
  
 //listener for server
 app.listen(process.env.PORT, (req, res) => {
-  console.log(`Server is running on PORT : ${process.env.PORT}`);
+  console.log(`Server is running on port: ${process.env.PORT}`);
 });
