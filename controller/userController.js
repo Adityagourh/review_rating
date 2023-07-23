@@ -23,7 +23,7 @@ let createUser = async (req, res) => {
       req.file ? unlinkSync(req.file.path) : null;
       res.status(401).json({
         success: false,
-        message: "user is already register with this email",
+        message: "User is already registered with this email",
       });
     } else {
       userData.userPassword = await bcrypt.hash(req.body.userPassword, salt);
@@ -60,15 +60,15 @@ let userLogin = async (req, res) => {
         const token = jwt.sign({ userData }, process.env.SECRET_KEY, {
           expiresIn: "2m",
         });
-        res.status(201).json({
+        res.status(200).json({
           success: true,
           message: "Login sucessfully",
           token: token,
         });
       } else {
-        res.status(401).json({
+        res.status(400).json({
           success: false,
-          message: "Wrong user name and password",
+          message: "Invalid user email or password",
         });
       }
     } else {

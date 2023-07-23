@@ -1,9 +1,10 @@
 require("dotenv").config();
 require("./config/modelConfig");
-let commonRouter = require("./routes/mainRouter");
-let express = require("express");
-const { transporter, mailOption } = require("./services/emailService");
+const commonRouter = require("./routes/mainRouter");
+const express = require("express");
 const cron =require('node-cron')
+const { transporter, mailOption } = require("./services/emailService");
+const logger = require("./utils/userLoger")
 
 let app = express();
 app.use(express.json()); // install json formate from express
@@ -37,6 +38,11 @@ app.get("/send", async (req, res) => {
  
  
 //listener for server
-app.listen(process.env.PORT, (req, res) => {
-  console.log(`Server is running on port: ${process.env.PORT}`);
+const HOST = 'localhost';
+const PORT = process.env.PORT ||9000;
+const server  = app.listen(process.env.PORT, (req, res) => {
+  //console.log(`Server is running on PORT : ${process.env.PORT}`);
+  logger.info(`server started and runnig on http://${HOST}:${PORT}`);
 });
+
+module.exports = server; 

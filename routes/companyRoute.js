@@ -9,7 +9,7 @@ let router = express.Router();
 router.post('/create',companyUpload.single("profilePic"),registerUserValidation,company.createCompany)
 router.get('/list',company.companyList)
 router.get('/review/:id',company.companyDetails);
-router.get('/findcompanies',company.searchCompaniesByLetter);
-router.get('/findcompanies',company.searchCompaniesByLetter);
+router.get('/findcompanies',company.searchCompaniesByLetterWithBody);
+router.get('/searchcompany/:letters',company.searchCompaniesByLetterWithParams);
 
 module.exports = router

@@ -7,7 +7,7 @@ let {upload}=require('../middlewares/imageStorage');
 let router = express.Router();
 
 router.post ('/create'  ,upload.single("profilePic"),registerUserValidation, user.createUser)
-router.get('/login' ,loginUserValidation , user.userLogin)
+router.post ('/login' ,loginUserValidation , user.userLogin)
 router.get('/check' , userAuthentication , user.checktoken)
 router.post('/varification' , user.resetUserPassword)
 router.post('/resetpassword/:id/:token' ,resetPassword, user.resetPassword)

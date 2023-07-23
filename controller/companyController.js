@@ -11,7 +11,7 @@ module.exports = {
       });
       if (isCompanyExists) {
         req.file ?unlinkSync(req.file.path):null;//agar same name ki company ho to profile pic upload na ho 
-        res.status(409).json({
+        res.status(401).json({
           success: false,
           message: "Company is already exist",
         });
@@ -75,10 +75,10 @@ companyDetails: async (req, res) => {
 },
 
 //Get company name by letters
-searchCompaniesByLetter: async (req, res)=>{
+searchCompaniesByLetterWithBody: async (req, res)=>{
   try{
     let companyName=req.body.companyName;
-    console.log(companyName);
+    //console.log(companyName);
     let companies = await companySchema.find({
       companyName: {$regex: `^${companyName}`, $options: "i"},
     })
@@ -91,7 +91,37 @@ searchCompaniesByLetter: async (req, res)=>{
     }else{
         res.status(400).json({
         success:false,
-        message: "Companys are not founds "
+        message: "Companys are not exists "
+       })  
+    }
+  }catch(error){
+    res.status(500).json({
+      success: false,
+      error:`Error occur ${error.message}`,
+    });
+
+  }
+},
+
+
+//Get company name by letters with params
+searchCompaniesByLetterWithParams: async (req, res)=>{
+  try{
+    let {letters}=req.params;
+    //console.log(companyName);
+    let companies = await companySchema.find({
+      companyName: {$regex: `^${letters}`, $options: "i"},
+    })
+    if(companies.length>0){
+        res.status(200).json({
+        success:true,
+        message: "Company found successfully",
+        companies:companies
+       })
+    }else{
+        res.status(400).json({
+        success:false,
+        message: "Companys are not exists "
        })  
     }
   }catch(error){
