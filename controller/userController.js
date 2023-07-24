@@ -1,8 +1,7 @@
 const userSchema = require("../models/userSchema");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { transporter, mailOption } = require("../services/emailService");
-//const { unlink } = require('../routes/companyRoute'); 
+const { transporter } = require("../services/emailService");
 const { unlinkSync } = require("fs");
 
 let createUser = async (req, res) => {
@@ -10,12 +9,12 @@ let createUser = async (req, res) => {
   const salt = await bcrypt.genSalt(10);
   try {
     userData.userName = req.body.userName
-      .trim()
-      .split(" ")
-      .map((data) => {
-        return data.charAt(0).toUpperCase() + data.slice(1);
-      })
-      .join(" ");
+    .trim()
+    .split(" ")
+    .map((data) => {
+      return data.charAt(0).toUpperCase() + data.slice(1);
+    })
+    .join(" ");
     const isUserExist = await userSchema.findOne({
       userEmail: req.body.userEmail,
     });
@@ -29,9 +28,9 @@ let createUser = async (req, res) => {
       userData.userPassword = await bcrypt.hash(req.body.userPassword, salt);
       const filePath = `/uploads/user/${req.file.filename}`;
       userData.profilePic = filePath;
-
+      
       let user = await userData.save();
-        res.status(201).json({
+      res.status(201).json({
         success: true,
         message: "User added Successfully",
         user: user,
@@ -52,22 +51,22 @@ let userLogin = async (req, res) => {
       userEmail: req.body.userEmail,
     });
     if (userData) {
-      const hashPassword = await bcrypt.compare(
+      const hashPassword = bcrypt.compare(
         req.body.userPassword,
         userData.userPassword
-      );
-      if (userData && hashPassword) {
-        const token = jwt.sign({ userData }, process.env.SECRET_KEY, {
-          expiresIn: "2m",
-        });
-        res.status(200).json({
-          success: true,
-          message: "Login sucessfully",
-          token: token,
-        });
-      } else {
-        res.status(400).json({
-          success: false,
+        );
+        if (userData && hashPassword) {
+          const token = jwt.sign({ userData }, process.env.SECRET_KEY, {
+            expiresIn: "2m",
+          });
+          res.status(200).json({
+            success: true,
+            message: "Login sucessfully",
+            token: token,
+          });
+        } else {
+          res.status(400).json({
+            success: false,
           message: "Invalid user email or password",
         });
       }
@@ -91,7 +90,7 @@ let checktoken = async (req, res) => {
 };
 
 //User  Send Email for reset password API
-const resetUserPassword = async (req, res) => {
+const sendResetLink = async (req, res) => {
   const { userEmail } = req.body;
   try {
     const userData = await userSchema.findOne({
@@ -132,11 +131,9 @@ const resetUserPassword = async (req, res) => {
 //Reset Password from url API
 let resetPassword = async (req, res) => {
   const { id, token } = req.params;
-//console.log("id", id);
   let { newPassword, confirmPassword } = req.body;
   try {
     const checkUser = await userSchema.findById(id);
-    console.log("secret key=", checkUser._id);
     if (checkUser != null) {
       const secretKey = checkUser._id + process.env.SECRET_KEY;
       jwt.verify(token, secretKey);
@@ -174,6 +171,7 @@ module.exports = {
   createUser,
   userLogin,
   checktoken,
-  resetUserPassword,
+  sendResetLink,
   resetPassword,
 };
+//const { unlink } = require('../routes/companyRoute'); 

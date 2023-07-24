@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const userAuthentication = async (req, res, next) => {
+const tokenVerification = async (req, res, next) => {
   const authHeader = req.headers.Authorization || req.headers.authorization;
   if (authHeader && authHeader.startsWith("Bearer")) {
     let token = authHeader.split(" ")[1];
@@ -24,5 +24,5 @@ const userAuthentication = async (req, res, next) => {
 };
 
 module.exports = {
-  userAuthentication,
+tokenVerification,
 };

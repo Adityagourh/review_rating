@@ -1,4 +1,4 @@
-let reviewVal= require('./reviewValSchema');
+const reviewVal = require("./reviewValSchema")
 
 module.exports = {
   reviewValidation: async (req, res, next) => {
@@ -13,5 +13,5 @@ module.exports = {
     } else {
       next();
     }
-  },
+  },  
 }
