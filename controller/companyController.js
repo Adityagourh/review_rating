@@ -9,7 +9,7 @@ module.exports = {
       let isCompanyExists = await companySchema.findOne({
         companyName: req.body.companyName,
       });
-      if (isCompanyExists) {
+      if (isCompanyExists != null) {
         req.file ?unlinkSync(req.file.path):null;//agar same name ki company ho to profile pic upload na ho 
         res.status(401).json({
           success: false,
@@ -77,10 +77,10 @@ companyDetails: async (req, res) => {
 //Get company name by letters
 searchCompaniesByLetterWithBody: async (req, res)=>{
   try{
-    let companyName=req.body.companyName;
-    //console.log(companyName);
+    let companysByLetter= await req.body.companyByLetter;
+    console.log(req.body.companyByLetter);
     let companies = await companySchema.find({
-      companyName: {$regex: `^${companyName}`, $options: "i"},
+      companyName: {$regex: `^${companysByLetter}`, $options: "i"},
     })
     if(companies.length>0){
         res.status(200).json({
@@ -102,7 +102,6 @@ searchCompaniesByLetterWithBody: async (req, res)=>{
 
   }
 },
-
 
 //Get company name by letters with params
 searchCompaniesByLetterWithParams: async (req, res)=>{

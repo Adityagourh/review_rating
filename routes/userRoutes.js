@@ -7,8 +7,7 @@ let router = express.Router();
 
 router.post ('/create'  ,upload.single("profilePic"),registerUserValidation, user.createUser)
 router.post ('/login' ,loginUserValidation , user.userLogin)
-router.get('/check' ,tokenVerification , user.checktoken)
 router.post('/sendlink' , user.sendResetLink)
-router.post('/resetpassword/:id/:token' ,resetPassword, user.resetPassword)
+router.get('/resetpassword/:id/:token' ,resetPassword, user.resetPassword)
 
 module.exports = router

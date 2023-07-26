@@ -4,21 +4,22 @@ const jwt = require("jsonwebtoken");
 const { transporter } = require("../services/emailService");
 const { unlinkSync } = require("fs");
 
+//Create user api
 let createUser = async (req, res) => {
   const userData = new userSchema(req.body);
   const salt = await bcrypt.genSalt(10);
   try {
     userData.userName = req.body.userName
-    .trim()
-    .split(" ")
-    .map((data) => {
-      return data.charAt(0).toUpperCase() + data.slice(1);
-    })
-    .join(" ");
+      .trim()
+      .split(" ")
+      .map((data) => {
+        return data.charAt(0).toUpperCase() + data.slice(1);
+      })
+      .join(" ");
     const isUserExist = await userSchema.findOne({
       userEmail: req.body.userEmail,
     });
-    if (isUserExist) {
+    if (isUserExist != null) {
       req.file ? unlinkSync(req.file.path) : null;
       res.status(401).json({
         success: false,
@@ -28,11 +29,11 @@ let createUser = async (req, res) => {
       userData.userPassword = await bcrypt.hash(req.body.userPassword, salt);
       const filePath = `/uploads/user/${req.file.filename}`;
       userData.profilePic = filePath;
-      
+
       let user = await userData.save();
       res.status(201).json({
         success: true,
-        message: "User added Successfully",
+        message: "User added sucessfully",
         user: user,
       });
     }
@@ -44,29 +45,29 @@ let createUser = async (req, res) => {
   }
 };
 
-//User Login
+//User Login api
 let userLogin = async (req, res) => {
   try {
     let userData = await userSchema.findOne({
       userEmail: req.body.userEmail,
     });
     if (userData) {
-      const hashPassword = bcrypt.compare(
+      const hashPassword = await bcrypt.compare(
         req.body.userPassword,
         userData.userPassword
-        );
-        if (userData && hashPassword) {
-          const token = jwt.sign({ userData }, process.env.SECRET_KEY, {
-            expiresIn: "2m",
-          });
-          res.status(200).json({
-            success: true,
-            message: "Login sucessfully",
-            token: token,
-          });
-        } else {
-          res.status(400).json({
-            success: false,
+      );
+      if (userData && hashPassword) {
+        const token = jwt.sign({ userData }, process.env.SECRET_KEY, {
+          expiresIn: "2m",
+        });
+        res.status(200).json({
+          success: true,
+          message: "Login successfully",
+          token: token,
+        });
+      } else {
+        res.status(401).json({
+          success: false,
           message: "Invalid user email or password",
         });
       }
@@ -82,11 +83,6 @@ let userLogin = async (req, res) => {
       error: error,
     });
   }
-};
-
-//Json web Token
-let checktoken = async (req, res) => {
-  res.send("Your token is valid");
 };
 
 //User  Send Email for reset password API
@@ -105,19 +101,19 @@ const sendResetLink = async (req, res) => {
       let info = await transporter.sendMail({
         from: "aditya.ca777@gmail.com",
         to: userEmail,
-        subject: "Email for user reset Password",
-        text: `<a href=${link}>click here`,
+        subject: "Email for user reset password",
+        html: `<a href=${link}>click here</a>`,
       });
       return res.status(201).json({
         success: true,
-        message: "Email sent successfully",
+        message: "Email sent sucessfully",
         token: token,
         userID: userData._id,
       });
     } else {
       res.status(403).json({
         success: false,
-        message: "Please Enter Valid Email",
+        message: "Please enter valid email",
       });
     }
   } catch (error) {
@@ -145,12 +141,12 @@ let resetPassword = async (req, res) => {
         });
         res.status(203).json({
           success: true,
-          message: "Password reset Successfully",
+          message: "Password reset successfully",
         });
       } else {
-        res.status(403).json({
+        res.status(401).json({
           success: false,
-          message: "Password and Confirm password is not same",
+          message: "New password and confirm password is not same",
         });
       }
     } else {
@@ -170,8 +166,7 @@ let resetPassword = async (req, res) => {
 module.exports = {
   createUser,
   userLogin,
-  checktoken,
   sendResetLink,
   resetPassword,
 };
-//const { unlink } = require('../routes/companyRoute'); 
+//const { unlink } = require('../routes/companyRoute');

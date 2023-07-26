@@ -9,8 +9,8 @@ router.post('/create',tokenVerification,companyUpload.single("profilePic"),regis
 
 router.get('/list',company.companyList)
 router.get('/review/:id',company.companyDetails);
-router.get('/findcompanies',company.searchCompaniesByLetterWithBody);
+router.post('/findcompanies',company.searchCompaniesByLetterWithBody);
+router.get('/searchcompany/:letters',company.searchCompaniesByLetterWithParams);
 
 module.exports = router
-// router.get('/searchcompany/:letters',company.searchCompaniesByLetterWithParams);
 //let {authorizeAdmin}= require('../middlewares/authontication')
