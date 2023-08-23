@@ -17,7 +17,6 @@ module.exports = {
   },
 
   //User login validation
-  
   loginUserValidation: async (req, res, next) => {
     const value = await schema.loginUserValidation.validate(req.body, {
       abortEarly: false,

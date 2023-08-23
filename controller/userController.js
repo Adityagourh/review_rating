@@ -9,13 +9,6 @@ let createUser = async (req, res) => {
   const userData = new userSchema(req.body);
   const salt = await bcrypt.genSalt(10);
   try {
-    userData.userName = req.body.userName
-      .trim()
-      .split(" ")
-      .map((data) => {
-        return data.charAt(0).toUpperCase() + data.slice(1);
-      })
-      .join(" ");
     const isUserExist = await userSchema.findOne({
       userEmail: req.body.userEmail,
     });
@@ -29,7 +22,6 @@ let createUser = async (req, res) => {
       userData.userPassword = await bcrypt.hash(req.body.userPassword, salt);
       const filePath = `/uploads/user/${req.file.filename}`;
       userData.profilePic = filePath;
-
       let user = await userData.save();
       res.status(201).json({
         success: true,
@@ -80,7 +72,7 @@ let userLogin = async (req, res) => {
   } catch (error) {
     res.status(500).send({
       success: false,
-      error: error,
+      error: `Error occur ${error.message}`,
     });
   }
 };
@@ -139,7 +131,7 @@ let resetPassword = async (req, res) => {
         await userSchema.findByIdAndUpdate(checkUser._id, {
           $set: { userPassword: bcryptPassword },
         });
-        res.status(203).json({
+        res.status(200).json({
           success: true,
           message: "Password reset successfully",
         });

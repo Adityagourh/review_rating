@@ -58,7 +58,7 @@ const schema = {
 
   //--------login validation---------
 
-  loginUserValidation: joi
+   loginUserValidation: joi
     .object({
       userEmail: joi
         .string()
