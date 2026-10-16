@@ -11,6 +11,9 @@ let app = express();
 app.use(cors()); // allow the frontend (different origin/port) to call this API
 app.use(express.json()); // install json formate from express
 app.use("/uploads", express.static(__dirname + "/uploads")); // serve uploaded profile/company images
+app.get("/", (req, res) => {
+  res.json({ success: true, message: "Review & Rating API is running" });
+});
 app.use("/", commonRouter); // use common router
 
 // Email send by nodemailer

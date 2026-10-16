@@ -1,6 +1,6 @@
 # Review & Rating API — Documentation
 
-Base URL (local): `http://localhost:9000`
+Base URL: same origin the server is reached on (local default `http://localhost:9000`)
 No global path prefix — routes are mounted directly at `/user`, `/company`, `/comment`.
 
 All JSON responses share a common `success: boolean` envelope. File-uploabcng endpoints expect `multipart/form-data`; everything else expects `application/json`.

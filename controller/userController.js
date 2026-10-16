@@ -90,7 +90,7 @@ const sendResetLink = async (req, res) => {
       const token = jwt.sign({ userID: userData._id }, secret, {
         expiresIn: "20m",
       });
-      const link = `http://127.0.0.1:3000/user/reset-password/${userData._id}/${token}`;
+      const link = `${req.protocol}://${req.get("host")}/user/resetpassword/${userData._id}/${token}`;
       // SMTP email sending disabled locally — hardcoded OTP used instead.
       // let info = await transporter.sendMail({
       //   from: "abc.abc@gmail.com",
@@ -104,6 +104,7 @@ const sendResetLink = async (req, res) => {
         message: "OTP generated successfully (email sending disabled locally)",
         otp: otp,
         token: token,
+        resetLink: link,
         userID: userData._id,
       });
     } else {
