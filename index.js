@@ -53,9 +53,11 @@ app.get("/send", async (req, res) => {
 //listener for server
 const HOST = 'localhost';
 const PORT = process.env.PORT ||9000;
-const server  = app.listen(process.env.PORT, (req, res) => {
-  //console.log(`Server is running on PORT : ${process.env.PORT}`);
-  logger.info(`server started and runnig on http://${HOST}:${PORT}`);
-});
+// Vercel runs the exported app itself, so only listen when running locally
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    logger.info(`server started and runnig on http://${HOST}:${PORT}`);
+  });
+}
 
-module.exports = server; 
+module.exports = app;
