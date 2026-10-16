@@ -21,7 +21,8 @@ const logger = createLogger({
       format.printf(info=> `level :${info.level}: ${[info.timestamp]}:${info.message}`),
       ),
     }),
-    new transports.File({
+    // Vercel has a read-only filesystem, so file logging is local-only
+    ...(process.env.VERCEL ? [] : [new transports.File({
       filename: "logs/user_log_info.log",
       level: "info",
       maxsize: 5242880,
@@ -31,7 +32,7 @@ const logger = createLogger({
     format.align(),
     format.printf(info=> `level : ${info.level}: ${[info.timestamp]}:${info.message}`),
     ),
-    }),
+    })]),
     new transports.MongoDB({
         level: 'info',
         db: process.env.URL,
