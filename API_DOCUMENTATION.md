@@ -9,25 +9,28 @@ All JSON responses share a common `success: boolean` envelope. File-uploabcng en
 
 ## Role-based access control
 
-**There is no active role-based access control in this project.**
+Users have a `userRole` of `"user"` (default) or `"admin"`. It can't be set at signup (`POST /user/create` strips it) — bootstrap the first admin with `node scripts/makeAdmin.js <userEmail>`, then manage roles from the admin panel.
 
-- `models/userSchema.js` has a `userRole` field that defaults to `"user"` on every signup.
-- `middlewares/authontication.js` defines an `authorizeAdmin` middleware that checks `req.user.role === "users"`, but it is **not wired into any route** — it's only referenced as a commented-out import in `routes/companyRoute.js` (`//let {authorizeAdmin}= require('../middlewares/authontication')`) and is dead code.
-- Test files (`test/user.test.js`, `test/companyReviewTestCase.js`) reference an `"admin"` role in comments only — never asserted against real middleware.
+Admin-only routes run `tokenVerification` then `authorizeAdmin` (`middlewares/authontication.js`, `403 "Only admin can perform this action"` otherwise):
 
-**What access control actually exists** is authentication-only (logged-in vs. not), via `middlewares/authToken.js` (`tokenVerification`):
+| Method | Path | Body | Notes |
+|---|---|---|---|
+| POST | `/company/create` | multipart: `companyName`, `companyCity`, `companyLocation`, `profilePic?` | |
+| PATCH | `/company/update/:id` | multipart: any company field, `profilePic?` | `404` if not found |
+| DELETE | `/company/delete/:id` | — | also deletes the company's reviews |
+| GET | `/user/list` | — | `{ totalUsers, users[] }`, passwords excluded |
+| PATCH | `/user/role/:id` | `{ userRole: "user" \| "admin" }` | can't change your own role |
+| DELETE | `/user/delete/:id` | — | also deletes the user's reviews; can't delete yourself |
 
 | Check | Behavior |
 |---|---|
 | No/invalid `Authorization` header | `409` `{ success: false, message: "token is invalid" }` |
 | Expired/invalid JWT | `401` `{ success: false, message: "Token Expire please Login aganin" }` |
-| Valid JWT | attaches decoded `req.user`, calls `next()` — **no role check of any kind** |
+| Valid JWT, not admin (admin routes) | `403` `{ success: false, message: "Only admin can perform this action" }` |
 
-`tokenVerification` is applied to exactly **one** route: `POST /company/create`. Every other route (including creating/updating/deleting reviews) has **no auth middleware at all** — anyone can call them, logged in or not.
+Review routes (`/comment/*`) still have **no auth middleware** — anyone can call them.
 
 Expected `Authorization` header format: `Authorization: Bearer <token>`
-
-> ⚠️ If you need real RBAC (e.g. only admins can add companies, only a review's author can edit/delete it), that logic doesn't exist yet and would need to be built — the `userRole` field and `authorizeAdmin` middleware are just unused scaffolding.
 
 ---
 

@@ -38,7 +38,7 @@ module.exports = {
   companyList: async (req, res) => {
     try {
       let companys = await companySchema.find();
-      let totalCompanies = await companySchema.find().count();
+      let totalCompanies = companys.length;
       res.status(200).json({
         success: true,
         totalCompanies: totalCompanies,
@@ -129,6 +129,36 @@ searchCompaniesByLetterWithParams: async (req, res)=>{
       error:`Error occur ${error.message}`,
     });
 
+  }
+},
+
+//Update company (admin)
+updateCompany: async (req, res) => {
+  try {
+    const update = { ...req.body };
+    if (req.file) update.profilePic = `/uploads/company/${req.file.filename}`;
+    const company = await companySchema.findByIdAndUpdate(req.params.id, update, { new: true });
+    if (!company) {
+      req.file ? unlinkSync(req.file.path) : null;
+      return res.status(404).json({ success: false, message: "Company not found" });
+    }
+    res.status(200).json({ success: true, message: "Company updated successfully", company });
+  } catch (error) {
+    res.status(500).json({ success: false, error: `Error occur ${error.message}` });
+  }
+},
+
+//Delete company and its reviews (admin)
+deleteCompany: async (req, res) => {
+  try {
+    const company = await companySchema.findByIdAndDelete(req.params.id);
+    if (!company) {
+      return res.status(404).json({ success: false, message: "Company not found" });
+    }
+    await companyReviewSchema.deleteMany({ companyId: req.params.id });
+    res.status(200).json({ success: true, message: "Company deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, error: `Error occur ${error.message}` });
   }
 },
 };

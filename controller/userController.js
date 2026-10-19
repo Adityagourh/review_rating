@@ -1,4 +1,5 @@
 const userSchema = require("../models/userSchema");
+const companyReviewSchema = require("../models/companyReviewSchema");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { transporter } = require("../services/emailService");
@@ -6,6 +7,7 @@ const { unlinkSync } = require("fs");
 
 //Create user api
 let createUser = async (req, res) => {
+  delete req.body.userRole; // roles are granted by an admin, never self-assigned at signup
   const userData = new userSchema(req.body);
   const salt = await bcrypt.genSalt(10);
   try {
@@ -160,7 +162,55 @@ let resetPassword = async (req, res) => {
   }
 };
 
+//List all users (admin)
+let listUsers = async (req, res) => {
+  try {
+    const users = await userSchema.find().select("-userPassword").sort({ createdAt: -1 });
+    res.status(200).json({ success: true, totalUsers: users.length, users });
+  } catch (error) {
+    res.status(500).json({ success: false, message: `Error occur ${error.message}` });
+  }
+};
+
+//Change a user's role (admin)
+let updateUserRole = async (req, res) => {
+  const { userRole } = req.body;
+  if (!["user", "admin"].includes(userRole)) {
+    return res.status(400).json({ success: false, message: "userRole must be 'user' or 'admin'" });
+  }
+  if (req.params.id === String(req.user._id)) {
+    return res.status(400).json({ success: false, message: "You can't change your own role" });
+  }
+  try {
+    const user = await userSchema
+      .findByIdAndUpdate(req.params.id, { userRole }, { new: true })
+      .select("-userPassword");
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+    res.status(200).json({ success: true, message: "Role updated successfully", user });
+  } catch (error) {
+    res.status(500).json({ success: false, message: `Error occur ${error.message}` });
+  }
+};
+
+//Delete user and their reviews (admin)
+let deleteUser = async (req, res) => {
+  if (req.params.id === String(req.user._id)) {
+    return res.status(400).json({ success: false, message: "You can't delete your own account" });
+  }
+  try {
+    const user = await userSchema.findByIdAndDelete(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+    await companyReviewSchema.deleteMany({ userId: req.params.id });
+    res.status(200).json({ success: true, message: "User deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: `Error occur ${error.message}` });
+  }
+};
+
 module.exports = {
+  listUsers,
+  updateUserRole,
+  deleteUser,
   createUser,
   userLogin,
   sendResetLink,
